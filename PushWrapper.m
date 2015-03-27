@@ -63,13 +63,19 @@
             }
         }
     }
+
+	if( [userInfo objectForKey:@"nid"] != NULL)
+	{
+		NSString * notificationId = [userInfo objectForKey:@"nid"];
+		[self sendNotificationOpened:notificationId];
+	}
 }
 
 -(void)setTokenAndConnect:(NSData *)token {
     NSLog(@"I got token, and connecting!!!!");
     NSData* oldToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"deviceToken"];
     pushToken = token;
-    if (oldToken && [oldToken isEqualToData:token]) {
+    if (oldToken && [oldToken isEqualToData:token] && (queString == nil)) {
         NSLog(@"I Already have this one!!");
     } else {
         [self connectSocket];
@@ -81,6 +87,9 @@
         if ([queSelectors[0] isEqualToString:@"registerUserName"]) {
             [self registerUserName:queSelectors[1]];
         }
+		else if ([queSelectors[0] isEqualToString:@"sendNotificationOpened"]) {
+			[self sendNotificationOpened:queSelectors[1]];
+		}
         queString = nil;
     }
 }
@@ -116,6 +125,20 @@
         queString = [NSString stringWithFormat:@"registerUserName:%@",username];
         [self connectSocket];
     }
+}
+
+- (void) sendNotificationOpened:(NSString *)notificationId {
+	
+	if( contextId )
+	{
+		[socketIO sendMessage:[NSString stringWithFormat:@"{\"qualifier\":\"pt.openapi.push/notificationOpened/1.0\",\"contextId\":\"%@\",\"data\":{\"hwid\":\"%@\",\"applicationId\":\"%@\",\"notificationId\":\"%@\"}}",contextId, [self stringFromDeviceToken], applicationId, notificationId]];
+	}
+	else
+	{
+		NSLog(@"Missing stuff, put in que");
+		queString = [NSString stringWithFormat:@"sendNotificationOpened:%@",notificationId];
+		[self connectSocket];
+	}
 }
 
 - (NSString*)stringFromDeviceToken {

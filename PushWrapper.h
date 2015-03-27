@@ -34,6 +34,7 @@
 -(void)setTokenAndConnect:(NSData *)token;
 -(void)registerUserName:(NSString*) username;
 -(void)processRemoteNotification:(NSDictionary*)userInfo;
+-(void)sendNotificationOpened:(NSString *)notificationId;
 
 //WEB SOCKET METHODS
 - (void) socketIODidConnect:(SocketIO *)socket;
